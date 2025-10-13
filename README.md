@@ -169,8 +169,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Contact
 - For questions or support, please contact:
-- Abhishek Sagar Sanda - [sabhisheksagar200@gmail.com](sabhisheksagar200@gmail.com)
-- Project Link: [SandaAbhishekSagar](https://github.com/SandaAbhishekSagar)
-- [Portfolio](https://abhisheksagar.netlify.app)
+- Pankhuri Gupta - [pankhuri0209@gmail.com](pankhuri0209@gmail.com)
+- Project Link: [Pankhuri](https://github.com/pankhuri0209)
+- [Portfolio](https://pankhurigupta.vercel.app)
 ---
 
