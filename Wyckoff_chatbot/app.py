@@ -20,8 +20,8 @@ from utils.model_handler import WyckoffModelHandler
 app = Flask(__name__)
 
 # Initialize Wyckoff model handler with direct path to .pth file
-wyckoff_model = WyckoffModelHandler(model_path="/assets/transformer_chatbot_gpu_deco_2.pth",
-                                   data_path="/assets/Cleaned_Wyckoff_QA_Dataset.csv" )
+wyckoff_model = WyckoffModelHandler(model_path="assets/transformer_chatbot_gpu_deco_2.pth",
+                                   data_path="assets/Cleaned_Wyckoff_QA_Dataset.csv" )
 
 # Wyckoff Q&A endpoint
 @app.route('/api/wyckoff_chat', methods=['POST'])
@@ -189,4 +189,10 @@ if __name__ == '__main__':
     
     # Run the Flask application
     logger.info("Starting Flask application")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Use environment variable PORT for production, fallback to 5001 for local
+    port = int(os.environ.get('PORT', 5001))
+    debug_mode = os.environ.get('FLASK_ENV', 'development') == 'development'
+    app.run(debug=debug_mode, host='0.0.0.0', port=port)
+else:
+    # Initialize app when running under gunicorn
+    initialize_app()

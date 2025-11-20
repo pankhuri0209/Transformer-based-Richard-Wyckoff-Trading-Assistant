@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: wyckoff-trading-assistant
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: "pip install -r Wyckoff_chatbot/requirements.txt"
+    startCommand: "cd Wyckoff_chatbot && gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120 --workers 1"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.0
+      - key: PORT
+        generateValue: true
