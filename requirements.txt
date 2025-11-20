@@ -1,0 +1,5 @@
+pandas
+yfinance
+torch
+flask
+gunicorn
