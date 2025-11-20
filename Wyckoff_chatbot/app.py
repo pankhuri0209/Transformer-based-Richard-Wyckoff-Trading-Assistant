@@ -20,8 +20,22 @@ from utils.model_handler import WyckoffModelHandler
 app = Flask(__name__)
 
 # Initialize Wyckoff model handler with direct path to .pth file
-wyckoff_model = WyckoffModelHandler(model_path="assets/transformer_chatbot_gpu_deco_2.pth",
-                                   data_path="assets/Cleaned_Wyckoff_QA_Dataset.csv" )
+# Model will be loaded lazily on first use
+wyckoff_model = None
+
+def get_wyckoff_model():
+    """Lazy loading of Wyckoff model"""
+    global wyckoff_model
+    if wyckoff_model is None:
+        wyckoff_model = WyckoffModelHandler(
+            model_path="assets/transformer_chatbot_gpu_deco_2.pth",
+            data_path="assets/Cleaned_Wyckoff_QA_Dataset.csv"
+        )
+        try:
+            wyckoff_model.load_model()
+        except Exception as e:
+            logger.warning(f"Could not load model: {e}")
+    return wyckoff_model
 
 # Wyckoff Q&A endpoint
 @app.route('/api/wyckoff_chat', methods=['POST'])
@@ -32,19 +46,24 @@ def wyckoff_chat():
     logger.info(f"Received chat question: {question}")
     
     try:
+        model = get_wyckoff_model()
         # Try to generate a response using the model
-        response = wyckoff_model.generate_response(question)
+        response = model.generate_response(question)
         
         # If model failed or is not available, use fallback
         if not response:
             logger.info("Model response not available, using fallback")
-            response = wyckoff_model.get_fallback_response(question)
+            response = model.get_fallback_response(question)
             
         logger.info(f"Responding with: {response[:50]}...")
         return jsonify({"response": response})
     except Exception as e:
         logger.error(f"Error in wyckoff_chat: {str(e)}")
-        return jsonify({"response": "I apologize, but I'm having trouble processing your request right now."}), 500
+        # Use fallback responses directly
+        from utils.model_handler import WyckoffModelHandler
+        temp_model = WyckoffModelHandler(model_path="", data_path="")
+        response = temp_model.get_fallback_response(question)
+        return jsonify({"response": response})
 
 # Stock data retrieval endpoint
 @app.route('/api/stock_data', methods=['GET'])
@@ -176,12 +195,12 @@ def server_error(e):
 # Initialize the application
 def initialize_app():
     logger.info("Initializing application...")
-    # Try to load the Wyckoff model
-    success = wyckoff_model.load_model()
-    if success:
-        logger.info("Wyckoff model loaded successfully")
-    else:
-        logger.warning("Wyckoff model could not be loaded, will use fallback responses")
+    logger.info("Application ready - model will be loaded on first use")
+
+# Health check endpoint
+@app.route('/health')
+def health_check():
+    return jsonify({"status": "healthy", "message": "Wyckoff Trading Assistant is running"}), 200
 
 if __name__ == '__main__':
     # Initialize the app before running
